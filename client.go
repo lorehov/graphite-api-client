@@ -29,8 +29,8 @@ func (e RequestError) Error() string {
 // Client is client to `graphite web api` (http://graphite-api.readthedocs.io/en/latest/api.html).
 // You can either instantiate it manually by providing `url` and `client` or use a `NewFromString` shortcut.
 type Client struct {
-	url url.URL
-	client *http.Client
+	Url url.URL
+	Client *http.Client
 }
 
 
@@ -57,7 +57,7 @@ func (g *Client) errorResponse(r RenderRequest, t string) ([]Series, error) {
 // QueryRender performs query to graphite `/render/` api. Normally it should return `[]graphite.Series`,
 // but if things go wrong it will return `graphite.RequestError` error.
 func (g *Client) QueryRender(r RenderRequest) ([]Series, error) {
-	response, err := g.client.Get(g.queryAsString(r))
+	response, err := g.Client.Get(g.queryAsString(r))
 	if err != nil {
 		return g.errorResponse(r, "Request error")
 	}
@@ -92,6 +92,6 @@ func (g *Client) QueryRenderFromUntil(from, until time.Time, targets []string) (
 
 
 func (g *Client) queryAsString(r RenderRequest) string {
-	return g.url.String() + requestToQueryString(r)
+	return g.Url.String() + requestToQueryString(r)
 }
 
