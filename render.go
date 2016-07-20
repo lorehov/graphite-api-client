@@ -7,6 +7,7 @@ import (
 	"net/url"
 )
 
+// RenderRequest is struct, describing request to graphite `/render/` api.
 type RenderRequest struct {
 	From	time.Time
 	Until	time.Time
@@ -15,7 +16,7 @@ type RenderRequest struct {
 }
 
 
-func (g RenderRequest) ToQueryString() string {
+func requestToQueryString(g RenderRequest) string {
 	values := url.Values{
 		"format": []string{"json"},
 		"target": g.Targets,
@@ -34,12 +35,14 @@ func (g RenderRequest) ToQueryString() string {
 }
 
 
+// Series describes time series data for given target.
 type Series struct {
 	Target string
 	Datapoints []DataPoint
 }
 
 
+// DataPoint describes concrete point of time series.
 type DataPoint struct {
 	Value float64
 	Timestamp time.Time

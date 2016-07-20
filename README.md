@@ -8,4 +8,4 @@
 ## About
 
 Client for [graphite web api](http://graphite-api.readthedocs.io/en/latest/api.html). Currently only render API was implemented,
-but metrics API will be implemented as well soon.
+but metrics API will be implemented as well soon. 
