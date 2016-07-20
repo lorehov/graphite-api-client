@@ -19,6 +19,7 @@ Full documentation with other examples could be found on [godoc](https://godoc.o
 	import (
 		"github.com/lorehov/graphite-api-client"
 		"log"
+		"fmt"
 	)
 
 	func main() {
