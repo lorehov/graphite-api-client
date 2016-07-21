@@ -38,7 +38,7 @@ var testUnmarshallMetricsCases = []struct{
 
 func TestUnmarshallMetrics(t *testing.T) {
 	for _, tc := range testUnmarshallMetricsCases {
-		res, err := unmarshallMetrics([]byte(tc.Json))
+		res, err := unmarshallSeries([]byte(tc.Json))
 		if !reflect.DeepEqual(res, tc.Result) {
 			t.Errorf("Result is %+v, \n expected %+v", res, tc.Result)
 		}

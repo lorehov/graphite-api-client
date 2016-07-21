@@ -5,8 +5,6 @@ import (
 	"time"
 	"strconv"
 	"net/url"
-	"net/http"
-	"io/ioutil"
 )
 
 // RenderRequest is struct, describing request to graphite `/render/` api.
@@ -47,23 +45,15 @@ func (r RenderRequest) toQueryString() string {
 // QueryRender performs query to graphite `/render/` api. Normally it should return `[]graphite.Series`,
 // but if things go wrong it will return `graphite.RequestError` error.
 func (c *Client) QueryRender(r RenderRequest) ([]Series, error) {
-	response, err := c.Client.Get(c.queryAsString(r))
+	empty := []Series{}
+	data, err := c.makeRequest(r)
 	if err != nil {
-		return c.errorResponse(r, "Request error")
-	}
-	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
-		return c.errorResponse(r, "Wrong status code")
+		return empty, err
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	metrics, err := unmarshallSeries(data)
 	if err != nil {
-		return c.errorResponse(r, "Can't read response body")
-	}
-
-	metrics, err := unmarshallMetrics(body)
-	if err != nil {
-		return c.errorResponse(r, "Can't unmarshall response")
+		return empty, c.createError(r, "Can't unmarshall response")
 	}
 	return metrics, nil
 }
@@ -83,7 +73,7 @@ type DataPoint struct {
 }
 
 
-func unmarshallMetrics(data []byte) ([]Series, error) {
+func unmarshallSeries(data []byte) ([]Series, error) {
 	empty, result := []Series{}, []Series{}
 	if len(data) == 0 {
 		return empty, nil

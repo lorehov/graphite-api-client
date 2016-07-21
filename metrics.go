@@ -1,11 +1,13 @@
 package graphite
 
 import (
+	"encoding/json"
 	"time"
 	"net/url"
 	"strconv"
 )
 
+// FindMetricRequest is struct describing request to /metrics/find api.
 type FindMetricRequest struct {
 	From	time.Time
 	Until	time.Time
@@ -34,7 +36,7 @@ func (r FindMetricRequest) toQueryString() string {
 	return "/metrics/find?" + qs
 }
 
-//{"text": "geo", "expandable": 1, "leaf": 0, "id": "cluster.geo", "allowChildren": 1}
+
 type Metric struct {
 	Id string
 	Text string
@@ -44,8 +46,27 @@ type Metric struct {
 }
 
 
-func (g *Client) FindMetrics(r FindMetricRequest) ([]Metric, error) {
-	return nil, nil
+// FindMetrics perform request to /metrics/find API: http://graphite-api.readthedocs.io/en/latest/api.html#metrics-find
+// It returns slice of Metric if all is OK or RequestError if things goes wrong.
+func (c *Client) FindMetrics(r FindMetricRequest) ([]Metric, error) {
+	empty := []Metric{}
+	data, err := c.makeRequest(r)
+	if err != nil {
+		return empty, err
+	}
+
+	metrics, err := unmarshallMetrics(data)
+	if err != nil {
+		return empty, c.createError(r, "Can't unmarshall response")
+	}
+	return metrics, nil
+}
+
+
+func unmarshallMetrics(data []byte) ([]Metric, error) {
+	var metrics []Metric
+	err := json.Unmarshal(data, &metrics)
+	return metrics, err
 }
 
 
@@ -72,12 +93,24 @@ func (r ExpandMetricRequest) toQueryString() string {
 }
 
 
+// Results is a list of metric ids.
 type ExpandResult struct {
 	Results []string
 }
 
 
-//{"results": ["cluster.geo", "cluster.mail"]}
-func (g *Client) ExpandMetrics(r ExpandMetricRequest) (ExpandResult, error) {
-	return ExpandResult{}, nil
+// FindMetrics perform request to /metrics/expand API: http://graphite-api.readthedocs.io/en/latest/api.html#metrics-expand
+// It returns slice of Metric if all is OK or RequestError if things goes wrong.
+func (c *Client) ExpandMetrics(r ExpandMetricRequest) (ExpandResult, error) {
+	result := ExpandResult{}
+	data, err := c.makeRequest(r)
+	if err != nil {
+		return result, err
+	}
+
+	err = json.Unmarshal(data, result)
+	if err != nil {
+		return result, c.createError(r, "Cant unmarshall response")
+	}
+	return result, nil
 }

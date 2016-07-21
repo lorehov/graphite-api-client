@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"errors"
+	"io/ioutil"
 )
 
 
@@ -45,8 +46,27 @@ func NewFromString(urlString string) (*Client, error) {
 }
 
 
-func (c *Client) errorResponse(r qsGenerator, t string) ([]Series, error) {
-	return []Series{}, RequestError{
+func (c *Client) makeRequest(q qsGenerator) ([]byte, error) {
+	empty := []byte{}
+	response, err := c.Client.Get(c.queryAsString(q))
+	if err != nil {
+		return empty, c.createError(q, "Request error")
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return empty, c.createError(q, "Wrong status code")
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return empty, c.createError(q, "Can't read response body")
+	}
+	return body, nil
+}
+
+
+func (c *Client) createError(r qsGenerator, t string) error {
+	return RequestError{
 		Type: t,
 		Query: c.queryAsString(r),
 	}
