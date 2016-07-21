@@ -5,9 +5,18 @@ import (
 	"time"
 	"strconv"
 	"net/url"
+	"net/http"
+	"io/ioutil"
 )
 
 // RenderRequest is struct, describing request to graphite `/render/` api.
+// No fields are required. If field has zero value it'll be just skipped in request.
+// RenderRequest.Targets are slice of strings, were every entry is a path identifying one or several metrics,
+// optionally with functions acting on those metrics.
+//
+// Warning. While wildcards could be used in Targets one should use them with caution, as
+// using of the simple target like "main.cluster.*.cpu.*" could result in hundreds of series
+// with megabytes of data inside.
 type RenderRequest struct {
 	From	time.Time
 	Until	time.Time
@@ -16,22 +25,47 @@ type RenderRequest struct {
 }
 
 
-func requestToQueryString(g RenderRequest) string {
+func (r RenderRequest) toQueryString() string {
 	values := url.Values{
 		"format": []string{"json"},
-		"target": g.Targets,
+		"target": r.Targets,
 	}
-	if !g.From.IsZero() {
-		values.Set("from", strconv.FormatInt(g.From.Unix(), 10))
+	if !r.From.IsZero() {
+		values.Set("from", strconv.FormatInt(r.From.Unix(), 10))
 	}
-	if !g.Until.IsZero() {
-		values.Set("until", strconv.FormatInt(g.Until.Unix(), 10))
+	if !r.Until.IsZero() {
+		values.Set("until", strconv.FormatInt(r.Until.Unix(), 10))
 	}
-	if g.MaxDataPoints != 0 {
-		values.Set("maxDataPoints", strconv.Itoa(g.MaxDataPoints))
+	if r.MaxDataPoints != 0 {
+		values.Set("maxDataPoints", strconv.Itoa(r.MaxDataPoints))
 	}
 	qs := values.Encode()
 	return "/render/?" + qs
+}
+
+
+// QueryRender performs query to graphite `/render/` api. Normally it should return `[]graphite.Series`,
+// but if things go wrong it will return `graphite.RequestError` error.
+func (c *Client) QueryRender(r RenderRequest) ([]Series, error) {
+	response, err := c.Client.Get(c.queryAsString(r))
+	if err != nil {
+		return c.errorResponse(r, "Request error")
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return c.errorResponse(r, "Wrong status code")
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return c.errorResponse(r, "Can't read response body")
+	}
+
+	metrics, err := unmarshallMetrics(body)
+	if err != nil {
+		return c.errorResponse(r, "Can't unmarshall response")
+	}
+	return metrics, nil
 }
 
 

@@ -1,8 +1,8 @@
+// Package graphite provides client to graphite-web-api (http://graphite-api.readthedocs.io/en/latest/api.html).
 package graphite
 
 import (
 	"net/http"
-	"io/ioutil"
 	"net/url"
 	"errors"
 )
@@ -45,40 +45,20 @@ func NewFromString(urlString string) (*Client, error) {
 }
 
 
-func (g *Client) errorResponse(r RenderRequest, t string) ([]Series, error) {
+func (c *Client) errorResponse(r qsGenerator, t string) ([]Series, error) {
 	return []Series{}, RequestError{
 		Type: t,
-		Query: g.queryAsString(r),
+		Query: c.queryAsString(r),
 	}
 }
 
 
-// QueryRender performs query to graphite `/render/` api. Normally it should return `[]graphite.Series`,
-// but if things go wrong it will return `graphite.RequestError` error.
-func (g *Client) QueryRender(r RenderRequest) ([]Series, error) {
-	response, err := g.Client.Get(g.queryAsString(r))
-	if err != nil {
-		return g.errorResponse(r, "Request error")
-	}
-	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
-		return g.errorResponse(r, "Wrong status code")
-	}
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return g.errorResponse(r, "Can't read response body")
-	}
-
-	metrics, err := unmarshallMetrics(body)
-	if err != nil {
-		return g.errorResponse(r, "Can't unmarshall response")
-	}
-	return metrics, nil
+func (c *Client) queryAsString(r qsGenerator) string {
+	return c.Url.String() + r.toQueryString()
 }
 
 
-func (g *Client) queryAsString(r RenderRequest) string {
-	return g.Url.String() + requestToQueryString(r)
+type qsGenerator interface {
+	toQueryString() string
 }
 

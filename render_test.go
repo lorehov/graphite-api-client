@@ -54,7 +54,7 @@ func TestNewClientFromString(t *testing.T) {
 	urlString := "http://domain.tld/path"
 	client, _ := NewFromString(urlString)
 	testRequest := RenderRequest{}
-	shouldUrl := urlString + requestToQueryString(testRequest)
+	shouldUrl := urlString + testRequest.toQueryString()
 	if shouldUrl != client.queryAsString(testRequest) {
 		t.Errorf("Resulting URL is %v, \n but should be %v", client.queryAsString(testRequest), shouldUrl)
 	}
@@ -84,7 +84,7 @@ func TestGraphiteRequest_ToQueryString(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		res := requestToQueryString(tc.Request)
+		res := tc.Request.toQueryString()
 		if res != tc.Result {
 			t.Errorf("Result should be \"%v\", but \"%v\" received", tc.Result, res)
 		}
