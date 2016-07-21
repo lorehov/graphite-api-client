@@ -160,25 +160,3 @@ func TestGraphiteClient_Query(t *testing.T) {
 		makeTest(t, tc.Request, tc.ExpectedQuery, tc.Result, tc.Series)
 	}
 }
-
-
-func TestGraphiteClient_QueryFromUntil(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		parsedQuery, _ := url.ParseQuery("format=json&from=1468339853&until=1468339853&target=main")
-		if !reflect.DeepEqual(r.URL.Query(), parsedQuery) {
-			t.Errorf("Expected query is %+v but %+v got", parsedQuery, r.URL.Query())
-		}
-		if r.URL.Path != "/render/" {
-			t.Errorf("Path should be `/render/` but %s found", r.URL.Path)
-		}
-		fmt.Fprintln(w, "[]")
-	}))
-	defer ts.Close()
-	client, _ := NewFromString(ts.URL)
-	res, _ := client.QueryRenderFromUntil(time.Unix(1468339853, 0), time.Unix(1468339853, 0), []string{"main"})
-	series := []Series{}
-	if !reflect.DeepEqual(res, series) {
-		t.Errorf("Expected series %+v, but %+v got", series, res)
-	}
-
-}

@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"fmt"
-	"time"
 	"strconv"
 )
 
@@ -22,9 +21,6 @@ func ExampleClient_QueryRender() {
 	client, _ := NewFromString(ts.URL)
 	res, _ := client.QueryRender(
 		RenderRequest{
-			From: time.Unix(1468339853, 0),
-			Until: time.Unix(1568339853, 0),
-			MaxDataPoints: 1000,
 			Targets: []string{"main"},
 		},
 	)
@@ -32,17 +28,6 @@ func ExampleClient_QueryRender() {
 	// Output: 1468339853
 }
 
-
-func ExampleClient_QueryRenderFromUntil() {
-	ts := createTestServer()
-	defer ts.Close()
-
-	client, _ := NewFromString(ts.URL)
-	res, _ := client.QueryRenderFromUntil(time.Unix(1468339853, 0), time.Unix(1568339853, 0), []string{"main"})
-	fmt.Printf(strconv.FormatInt(res[0].Datapoints[0].Timestamp.Unix(), 10))
-	// Output: 1468339853
-
-}
 
 func ExampleNewFromString() {
 	client, _ := NewFromString("http://my-graphite.tld")

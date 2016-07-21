@@ -3,7 +3,6 @@ package graphite
 import (
 	"net/http"
 	"io/ioutil"
-	"time"
 	"net/url"
 	"errors"
 )
@@ -76,18 +75,6 @@ func (g *Client) QueryRender(r RenderRequest) ([]Series, error) {
 		return g.errorResponse(r, "Can't unmarshall response")
 	}
 	return metrics, nil
-}
-
-
-// QueryRenderFromUntil is a shortcut function. You could use it if you don't want to manually
-// construct an instance of `graphite.RenderRequest`.
-func (g *Client) QueryRenderFromUntil(from, until time.Time, targets []string) ([]Series, error) {
-	return g.QueryRender(
-		RenderRequest{
-			From: from,
-			Until: until,
-			Targets: targets,
-		})
 }
 
 
