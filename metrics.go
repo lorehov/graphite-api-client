@@ -108,7 +108,7 @@ func (c *Client) ExpandMetrics(r ExpandMetricRequest) (ExpandResult, error) {
 		return result, err
 	}
 
-	err = json.Unmarshal(data, result)
+	err = json.Unmarshal(data, &result)
 	if err != nil {
 		return result, c.createError(r, "Cant unmarshall response")
 	}
