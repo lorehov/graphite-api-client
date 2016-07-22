@@ -1,9 +1,9 @@
 package graphite
 
 import (
-	"net/http/httptest"
-	"net/http"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 )
 
 func createFindMetricsTestServer() *httptest.Server {
@@ -13,7 +13,6 @@ func createFindMetricsTestServer() *httptest.Server {
 			{"text": "two", "expandable": 1, "leaf": 0, "id": "cluster.two", "allowChildren": 1}]`)
 	}))
 }
-
 
 func ExampleClient_FindMetrics() {
 	ts := createFindMetricsTestServer()
@@ -29,7 +28,6 @@ func ExampleClient_FindMetrics() {
 	// Output: [{Id:cluster.one Text:one Expandable:1 Leaf:0 AllowChildren:1} {Id:cluster.two Text:two Expandable:1 Leaf:0 AllowChildren:1}]
 
 }
-
 
 func createExpandMetricsTestServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

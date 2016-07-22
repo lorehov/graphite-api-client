@@ -1,9 +1,9 @@
 package graphite
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
 	"strconv"
 )
 
@@ -12,7 +12,6 @@ func createTestServer() *httptest.Server {
 		fmt.Fprintln(w, "[{\"target\": \"main\", \"datapoints\": [[1, 1468339853], [1.0, 1468339854], [null, 1468339855]]}]")
 	}))
 }
-
 
 func ExampleClient_QueryRender() {
 	ts := createTestServer()
@@ -27,7 +26,6 @@ func ExampleClient_QueryRender() {
 	fmt.Printf(strconv.FormatInt(res[0].Datapoints[0].Timestamp.Unix(), 10))
 	// Output: 1468339853
 }
-
 
 func ExampleNewFromString() {
 	client, _ := NewFromString("http://my-graphite.tld")

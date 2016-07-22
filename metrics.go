@@ -2,19 +2,18 @@ package graphite
 
 import (
 	"encoding/json"
-	"time"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 // FindMetricRequest is struct describing request to /metrics/find api.
 type FindMetricRequest struct {
-	From	time.Time
-	Until	time.Time
-	Query string
+	From      time.Time
+	Until     time.Time
+	Query     string
 	Wildcards bool
 }
-
 
 func (r FindMetricRequest) toQueryString() string {
 	values := url.Values{
@@ -36,15 +35,13 @@ func (r FindMetricRequest) toQueryString() string {
 	return "/metrics/find?" + qs
 }
 
-
 type Metric struct {
-	Id string
-	Text string
-	Expandable int
-	Leaf int
+	Id            string
+	Text          string
+	Expandable    int
+	Leaf          int
 	AllowChildren int
 }
-
 
 // FindMetrics perform request to /metrics/find API: http://graphite-api.readthedocs.io/en/latest/api.html#metrics-find
 // It returns slice of Metric if all is OK or RequestError if things goes wrong.
@@ -62,20 +59,17 @@ func (c *Client) FindMetrics(r FindMetricRequest) ([]Metric, error) {
 	return metrics, nil
 }
 
-
 func unmarshallMetrics(data []byte) ([]Metric, error) {
 	var metrics []Metric
 	err := json.Unmarshal(data, &metrics)
 	return metrics, err
 }
 
-
 type ExpandMetricRequest struct {
-	Query string
+	Query       string
 	GroupByExpr bool
-	LeavesOnly bool
+	LeavesOnly  bool
 }
-
 
 func (r ExpandMetricRequest) toQueryString() string {
 	values := url.Values{}
@@ -92,12 +86,10 @@ func (r ExpandMetricRequest) toQueryString() string {
 	return "/metrics/expand?" + qs
 }
 
-
 // Results is a list of metric ids.
 type ExpandResult struct {
 	Results []string
 }
-
 
 // FindMetrics perform request to /metrics/expand API: http://graphite-api.readthedocs.io/en/latest/api.html#metrics-expand
 // It returns slice of Metric if all is OK or RequestError if things goes wrong.

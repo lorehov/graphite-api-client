@@ -2,9 +2,9 @@ package graphite
 
 import (
 	"github.com/buger/jsonparser"
-	"time"
-	"strconv"
 	"net/url"
+	"strconv"
+	"time"
 )
 
 // RenderRequest is struct, describing request to graphite `/render/` api.
@@ -16,12 +16,11 @@ import (
 // using of the simple target like "main.cluster.*.cpu.*" could result in hundreds of series
 // with megabytes of data inside.
 type RenderRequest struct {
-	From	time.Time
-	Until	time.Time
+	From          time.Time
+	Until         time.Time
 	MaxDataPoints int
-	Targets []string
+	Targets       []string
 }
-
 
 func (r RenderRequest) toQueryString() string {
 	values := url.Values{
@@ -41,7 +40,6 @@ func (r RenderRequest) toQueryString() string {
 	return "/render/?" + qs
 }
 
-
 // QueryRender performs query to graphite `/render/` api. Normally it should return `[]graphite.Series`,
 // but if things go wrong it will return `graphite.RequestError` error.
 func (c *Client) QueryRender(r RenderRequest) ([]Series, error) {
@@ -58,20 +56,17 @@ func (c *Client) QueryRender(r RenderRequest) ([]Series, error) {
 	return metrics, nil
 }
 
-
 // Series describes time series data for given target.
 type Series struct {
-	Target string
+	Target     string
 	Datapoints []DataPoint
 }
 
-
 // DataPoint describes concrete point of time series.
 type DataPoint struct {
-	Value float64
+	Value     float64
 	Timestamp time.Time
 }
-
 
 func unmarshallSeries(data []byte) ([]Series, error) {
 	empty, result := []Series{}, []Series{}
@@ -108,7 +103,6 @@ func unmarshallSeries(data []byte) ([]Series, error) {
 	return result, nil
 }
 
-
 func unmarshallDatapoints(data []byte) ([]DataPoint, error) {
 	empty, result := []DataPoint{}, []DataPoint{}
 	rawData, _, _, err := jsonparser.Get(data, "datapoints")
@@ -132,7 +126,6 @@ func unmarshallDatapoints(data []byte) ([]DataPoint, error) {
 	}
 	return result, nil
 }
-
 
 func unmarshallDatapoint(data []byte) (DataPoint, error) {
 	empty, result := DataPoint{}, DataPoint{}
@@ -161,7 +154,7 @@ func unmarshallDatapoint(data []byte) (DataPoint, error) {
 			}
 			result.Timestamp = time.Unix(ts, 0)
 		}
-		position ++
+		position++
 	})
 	if err != nil {
 		return empty, err
