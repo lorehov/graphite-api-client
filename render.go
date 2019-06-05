@@ -74,7 +74,7 @@ func unmarshallSeries(data []byte) ([]Series, error) {
 		return empty, nil
 	}
 	var ie error = nil
-	err := jsonparser.ArrayEach(data, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err := jsonparser.ArrayEach(data, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		if err != nil {
 			return
 		}
@@ -110,7 +110,7 @@ func unmarshallDatapoints(data []byte) ([]DataPoint, error) {
 		return empty, err
 	}
 
-	err = jsonparser.ArrayEach(rawData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err = jsonparser.ArrayEach(rawData, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		if err != nil {
 			return
 		}
@@ -131,7 +131,7 @@ func unmarshallDatapoint(data []byte) (DataPoint, error) {
 	empty, result := DataPoint{}, DataPoint{}
 	var err error = nil
 	position := 0
-	err = jsonparser.ArrayEach(data, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err = jsonparser.ArrayEach(data, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		if err != nil {
 			return
 		}
